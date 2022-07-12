@@ -53,6 +53,7 @@ export const COLOR_KEY_VALUE = chalk.black.bold.bgGreenBright;
 
 export default class SFPLogger {
     public static logLevel: LoggerLevel = LoggerLevel.INFO;
+    public static isLogsDisabled: boolean = false;
 
     static enableColor() {
         chalk.level = 2;
@@ -63,49 +64,56 @@ export default class SFPLogger {
     }
 
     static log(message: string, logLevel = LoggerLevel.INFO, logger?: Logger) {
+        if (SFPLogger.isLogsDisabled)
+            return;
+        if (typeof jest == 'undefined') {
+            if (logLevel == null) logLevel = LoggerLevel.INFO;
 
-        if (logLevel == null) logLevel = LoggerLevel.INFO;
+            if (logLevel < this.logLevel) return;
 
-        if (logLevel < this.logLevel) return;
-
-        //Todo: Proper fix
-        if (logger && logger.logType === LoggerType.console) {
-            logger = null; //Make it nullable, so it goes to console
-        }
-
-        if (logger) {
-            if (logger.logType === LoggerType.void) {
-                return;
-            } else if (logger.logType === LoggerType.file) {
-                let fileLogger = logger as FileLogger;
-                message = message
-                    ?.toString()
-                    .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
-                fs.appendFileSync(fileLogger.path, message + EOL, 'utf8');
-            }
-        } else {
-            switch (logLevel) {
-                case LoggerLevel.TRACE:
-                    console.log(COLOR_TRACE(message));
-                    break;
-
-                case LoggerLevel.DEBUG:
-                    console.log(COLOR_DEBUG(message));
-                    break;
-
-                case LoggerLevel.INFO:
-                    console.log(message);
-                    break;
-
-                case LoggerLevel.WARN:
-                    console.log(COLOR_WARNING(message));
-                    break;
-
-                case LoggerLevel.ERROR:
-                    console.log(COLOR_ERROR(message));
-                    break;
+            //Todo: Proper fix
+            if (logger && logger.logType === LoggerType.console) {
+                logger = null; //Make it nullable, so it goes to console
             }
 
+            if (logger) {
+                if (logger.logType === LoggerType.void) {
+                    return;
+                } else if (logger.logType === LoggerType.file) {
+                    let fileLogger = logger as FileLogger;
+                    message = message
+                        ?.toString()
+                        .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+                    fs.appendFileSync(fileLogger.path, message + EOL, 'utf8');
+                }
+            } else {
+                switch (logLevel) {
+                    case LoggerLevel.TRACE:
+                        console.log(COLOR_TRACE(message));
+                        break;
+
+                    case LoggerLevel.DEBUG:
+                        console.log(COLOR_DEBUG(message));
+                        break;
+
+                    case LoggerLevel.INFO:
+                        console.log(message);
+                        break;
+
+                    case LoggerLevel.WARN:
+                        console.log(COLOR_WARNING(message));
+                        break;
+
+                    case LoggerLevel.ERROR:
+                        console.log(COLOR_ERROR(message));
+                        break;
+                }
+
+            }
         }
+    }
+
+    static disableLogs() {
+        SFPLogger.isLogsDisabled = true;
     }
 }
