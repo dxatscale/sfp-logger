@@ -1,9 +1,9 @@
 {
   "name": "@dxatscale/sfp-logger",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "sfp logger library",
   "main": "lib/SFPLogger.js",
-  "types":"lib/SFPLogger.d.ts",
+  "types": "lib/SFPLogger.d.ts",
   "files": [
     "lib"
   ],
